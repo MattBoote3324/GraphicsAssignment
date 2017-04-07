@@ -1,12 +1,12 @@
 //Jeff Chastine
 
-#include <GL\glew.h>
-#include <GL\freeglut.h>
+//#include <GL\glew.h>
+//#include <GL\freeglut.h>
 #include <iostream>
 #include "loadTGA.h"
 #include "TextureLoader.h"
 #include <cmath>
-# define M_PI           3.14159265358979323846  /* pi */
+//# define M_PI           3.14159265358979323846  /* pi */
 using namespace std;
 
 //--Draws a grid of lines on the floor plane -------------------------------
