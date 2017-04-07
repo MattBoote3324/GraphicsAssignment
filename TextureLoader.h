@@ -1,11 +1,11 @@
 #pragma once
 #include "loadTGA.h"
 #include "loadBMP.h"
-GLuint texId[13];
+GLuint texId[18];
 void loadTextures()
 {
 	
-	glGenTextures(13, texId);
+	glGenTextures(18, texId);
 	glBindTexture(GL_TEXTURE_2D, texId[0]);//Sky Back
 	loadTGA("Textures/sky_back.tga");
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -81,10 +81,42 @@ void loadTextures()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
-	glBindTexture(GL_TEXTURE_2D, texId[12]);//cp30 head texture
+	glBindTexture(GL_TEXTURE_2D, texId[12]);//cp30 head back texture
 	loadBMP("Textures/c3po_head_back.bmp");
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	
+	glBindTexture(GL_TEXTURE_2D, texId[13]);//door
+	loadBMP("Textures/door.bmp");
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	
+	glBindTexture(GL_TEXTURE_2D, texId[14]);//clone head texture
+	loadBMP("Textures/clone_head.bmp");
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	
+	glBindTexture(GL_TEXTURE_2D, texId[15]);//clone back head texture
+	loadBMP("Textures/clone_back_head.bmp");
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	
+	/*glBindTexture(GL_TEXTURE_2D, texId[16]);//clone chest texture
+	loadBMP("Textures/clone_chest.bmp");
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	
+	glBindTexture(GL_TEXTURE_2D, texId[17]);//clone back texture
+	loadBMP("Textures/clone_back.bmp");
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);*/
+	
+	
 
 }

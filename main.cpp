@@ -15,7 +15,7 @@ using namespace std;
 //--Globals ---------------------------------------------------------------
 float  theta = 0;
 float degreeRatio = M_PI / 180;
-float robots_rotation = 90  ;
+float robots_rotation = 0  ;
 
 bool increasing = false;
 float ship_floor_height = 25;
@@ -26,17 +26,21 @@ bool running = false;                        //Look angle
 int step = 0;	
 float r2_x_pos = 80, r2_z_pos = 5;
 float cp30_x_pos = 80, cp30_z_pos = -5;
+float storm_x_pos = -70, storm_z_pos = 0;
 float cp30_leg_angle = 10;
-float eye_x = 0, eye_y = ship_floor_height + 20, eye_z = 15;
+float eye_x = 0, eye_y = ship_floor_height + 20, eye_z = 10;
 float look_x = 0, look_y = 0, look_z = 0;
 bool cp30_angle_inc = false;
-float destination = -80;
+float destination = -40;
 float start = 80;
+float bullet_x_pos = 80;
 //--Draws a grid of lines on the floor plane -------------------------------
 void c3poColor()
 {
-	glColor3f(0.7983, 0.4375, 0.8242);
+	glColor3f(0.941, 0.902, 0.549);
 }
+
+
 void normal(float x1, float y1, float z1,
 	float x2, float y2, float z2,
 	float x3, float y3, float z3)
@@ -50,142 +54,187 @@ void normal(float x1, float y1, float z1,
 }
 void drawHangar()
 {
-	glBindTexture(GL_TEXTURE_2D, texId[8]);
-	glBegin(GL_QUADS);
-		glColor3f(1,0.,0.);
-		glNormal3f(0., 0., 1.0); //Front Side +z
-		glTexCoord2f(0, 0); glVertex3f(-100, 0., 30);
-		glTexCoord2f(1, 0); glVertex3f(100, 0., 30);
-		glTexCoord2f(1,1); glVertex3f(100, 50, 30);
-		glTexCoord2f(0, 1); glVertex3f(-100, 50, 30);
+	glPushMatrix();
+		glPushMatrix();
+			glBindTexture(GL_TEXTURE_2D, texId[8]);
+			glBegin(GL_QUADS);
+				
+				glNormal3f(0., 0., 1.0); //Front Side +z
+				glTexCoord2f(0, 0); glVertex3f(-100, 0., 30);
+				glTexCoord2f(1, 0); glVertex3f(100, 0., 30);
+				glTexCoord2f(1,1); glVertex3f(100, 50, 30);
+				glTexCoord2f(0, 1); glVertex3f(-100, 50, 30);
 
-		glNormal3f(0., 0., -1.0); //Back Side -z
-		glTexCoord2f(0, 0); glVertex3f(-100, 0., -30);
-		glTexCoord2f(0, 0); glVertex3f(100, 0., -30);
-		glTexCoord2f(0, 0); glVertex3f(100, 50, -30);
-		glTexCoord2f(0, 0); glVertex3f(-100, 50, -30);
+				glNormal3f(0., 0., -1.0); //Back Side -z
+				glTexCoord2f(0, 0); glVertex3f(-100, 0., -30);
+				glTexCoord2f(0, 0); glVertex3f(100, 0., -30);
+				glTexCoord2f(0, 0); glVertex3f(100, 50, -30);
+				glTexCoord2f(0, 0); glVertex3f(-100, 50, -30);
 
-		glNormal3f(-1, 0., 0.); //Left Side -x
-		glVertex3f(-100, 0, -30);glVertex3f(-100, 0, 30);glVertex3f(-100, 50, 30);glVertex3f(-100, 50, -30);
+				
 
-		glNormal3f(1, 0., 0.); //Right Side +x
-		//normal(100, 0., -30, 100, 0., 30, 100, 50, 30);
-		glVertex3f(100, 0., -30);glVertex3f(100, 0., 30);glVertex3f(100, 50, 30);glVertex3f(100, 50, -30);
+			glEnd();
+			glPushMatrix();
+			glBindTexture(GL_TEXTURE_2D, texId[7]);  /*Building the circular hallway*/
+			glBegin(GL_QUADS);
+				glNormal3f(0., 1, 0.);  //ship room roof
+				glTexCoord2f(0, 0); glVertex3f(-100, 50, 30);
+				glTexCoord2f(0,1); glVertex3f(-100, 50, -30);
+				glTexCoord2f(1,1); glVertex3f(100, 50, -30);
+				glTexCoord2f(1,0); glVertex3f(100, 50, 30);
 
-		normal(-100, 50, -30, -50, 70, -20, -50, 70, 20); //Top left Panel
-		glVertex3f(-100, 50, -30);glVertex3f(-50, 70, -20);glVertex3f(-50, 70, 20);glVertex3f(-100, 50, 30);
+				normal(-60, ship_floor_height, -10, -60, ship_floor_height + 5, -15, 60, ship_floor_height + 5, -15);
+				glTexCoord2f(0, 0); glVertex3f(-60, ship_floor_height, -10); //bottom Left quad
+				glTexCoord2f(0, 1); glVertex3f(-60, ship_floor_height + 5, -15);
+				glTexCoord2f(1, 1); glVertex3f(60, ship_floor_height + 5,-15);
+				glTexCoord2f(1, 0); glVertex3f(60, ship_floor_height, -10);
+				
+				normal(-60, ship_floor_height, 10, -60, ship_floor_height + 5, 15, 60, ship_floor_height + 5, 15);
+				glTexCoord2f(0, 0); glVertex3f(-60, ship_floor_height, 10);
+				glTexCoord2f(0, 1); glVertex3f(-60, ship_floor_height + 5, 15);  //bottom right
+				glTexCoord2f(1, 1); glVertex3f(60, ship_floor_height + 5, 15);
+				glTexCoord2f(1, 0); glVertex3f(60, ship_floor_height, 10);
 
-		normal(-100, 50, -30, -50, 70, -20, 50, 70, -20); //Top Middle Back Panel
-		glVertex3f(-100, 50, -30);glVertex3f(-50, 70, -20);glVertex3f(50, 70, -20);glVertex3f(100, 50, -30);
+				glTexCoord2f(0, 0); glVertex3f(-60, 50, 10);
+				glTexCoord2f(0, 1); glVertex3f(-60, 50 - 5, 15);	//top right
+				glTexCoord2f(1, 1); glVertex3f(60, 50 - 5, 15);
+				glTexCoord2f(1, 0); glVertex3f(60, 50, 10);
 
-		normal(-100, 50, 30, -50, 70, 20, 50, 70, 20); //Top Middle Front Panel
-		glVertex3f(-100, 50, 30);glVertex3f(-50, 70, 20);glVertex3f(50, 70, 20);glVertex3f(100, 50, 30);
+				glTexCoord2f(0, 0); glVertex3f(-60, 50, -10);
+				glTexCoord2f(0, 1); glVertex3f(-60, 50 - 5, -15);
+				glTexCoord2f(1, 1); glVertex3f(60, 50 - 5, -15);//top left
+				glTexCoord2f(1, 0); glVertex3f(60, 50, -10);
 
-		normal(100, 50, -30, 50, 70, -20, 50, 70, 20); //Top Right Panel
-		glVertex3f(100, 50, -30);glVertex3f(50, 70, -20);glVertex3f(50, 70, 20);glVertex3f(100, 50, 30);
+				glTexCoord2f(0, 0); glVertex3f(-60, ship_floor_height + 5, 15);
+				glTexCoord2f(0, 1); glVertex3f(-60, 45, 15);
+				glTexCoord2f(1, 1); glVertex3f(60, 45, 15); //right middle
+				glTexCoord2f(1, 0); glVertex3f(60, ship_floor_height + 5, 15);
 
-		normal(-50, 70, -20, -50, 70, 20, 50, 70, 20); //Top Top Panel
-		glVertex3f(-50, 70, -20);glVertex3f(-50, 70, 20);glVertex3f(50, 70, 20);glVertex3f(50, 70, -20);
+				glTexCoord2f(0, 0); glVertex3f(-60, ship_floor_height + 5, -15); //left middle
+				glTexCoord2f(0, 1); glVertex3f(-60, 45, -15);
+				glTexCoord2f(1, 1); glVertex3f(60, 45, -15);
+				glTexCoord2f(1, 0); glVertex3f(60, ship_floor_height + 5, -15);
 
-		normal(-100, 0, -30, -50, -20, -20, -50, -20, 20); //Bottom left Panel
-		glVertex3f(-100, 0, -30);glVertex3f(-50, -20, -20);glVertex3f(-50, -20, 20);glVertex3f(-100, 0, 30);
+				
+			glEnd();
+		glPopMatrix();
+		glPushMatrix();
+			glBindTexture(GL_TEXTURE_2D, texId[13]);
+			glBegin(GL_QUADS);  //door at end of tunnel
+				
+				glTexCoord2f(0, 0); glVertex3f(-60, ship_floor_height , -15); 
+				glTexCoord2f(0, 1); glVertex3f(-60, 50, -15);
+				glTexCoord2f(1, 1); glVertex3f(-60, 50, 15);
+				glTexCoord2f(1, 0); glVertex3f(-60, ship_floor_height , 15);
+			glEnd();
+		glPopMatrix();
+		glPushMatrix();
+			glBindTexture(GL_TEXTURE_2D, texId[6]);
+			glBegin(GL_QUADS);
+				
 
-		normal(-100, 0, -30, -50, -20, -20, 50, -20, -20); //Bottom Middle Back Panel
-		glVertex3f(-100, 0, -30);glVertex3f(-50, -20, -20);glVertex3f(50, -20, -20);glVertex3f(100, 0, -30);
+				normal(60, ship_floor_height, -10, 60, ship_floor_height, 10, -60, ship_floor_height, 10); //Ship Bridge
+				glTexCoord2f(1,0); glVertex3f(60, ship_floor_height, -10);
+				glTexCoord2f(1, 1); glVertex3f(60, ship_floor_height, 10);
+				glTexCoord2f(0,1); glVertex3f(-60, ship_floor_height, 10);
+				glTexCoord2f(0,0); glVertex3f(-60, ship_floor_height, -10);
 
-		normal(-100, 0, 30, -50, -20, 20, 50, -20, 20); //Bottom Middle Front Panel
-		glVertex3f(-100, 0, 30);glVertex3f(-50, -20, 20);glVertex3f(50, -20, 20);glVertex3f(100, 0, 30);
+				
+				normal(-100, ship_floor_height, 30, -100, ship_floor_height, -30, -60, ship_floor_height, -10); //Ship Floor Left Base
+				glTexCoord2f(1, 1); glVertex3f(-100, ship_floor_height, 30);
+				glTexCoord2f(0,1); glVertex3f(-100, ship_floor_height, -30);
+				glTexCoord2f(0, 0); glVertex3f(-60, ship_floor_height, -10);
+				glTexCoord2f(1, 0); glVertex3f(-60, ship_floor_height, 10);
 
-		normal(100, 0, -30, 50, -20, -20, 50, -20, 20); //Bottom Right Panel
-		glVertex3f(100, 0, -30);glVertex3f(50, -20, -20);glVertex3f(50, -20, 20);glVertex3f(100, 0, 30);
+				
+				normal(-100, ship_floor_height, 30, -100, ship_floor_height, -30, 60, ship_floor_height, -10); //Ship Floor Right Base
+				glTexCoord2f(1,1); glVertex3f(100, ship_floor_height, 30);
+				glTexCoord2f(0,1); glVertex3f(100, ship_floor_height, -30);
+				glTexCoord2f(0,0); glVertex3f(60, ship_floor_height, -10);
+				glTexCoord2f(1, 0); glVertex3f(60, ship_floor_height, 10);
 
-		normal(-50, -20, -20, -50, -20, 20, 50, -20, 20); //Bottom Bottom Panel
-		glVertex3f(-50, -20, -20);glVertex3f(-50, -20, 20);glVertex3f(50, -20, 20);glVertex3f(50, -20, -20);
+			glEnd();
+		glPopMatrix();
+			glPushMatrix();
+				glDisable(GL_TEXTURE_2D);
+				glBegin(GL_QUADS);
+					glColor3f(1.,1.,1.);
+					glNormal3f(-1, 0., 0.); //Left Side -x
+					glVertex3f(-100, 0, -30);glVertex3f(-100, 0, 30);glVertex3f(-100, 50, 30);glVertex3f(-100, 50, -30);
 
-	glEnd();
-	glBindTexture(GL_TEXTURE_2D, texId[7]);  /*Building the circular hallway*/
-	glBegin(GL_QUADS);
-		glNormal3f(0., 1, 0.);  //ship room roof
-		glTexCoord2f(0, 0); glVertex3f(-100, 50, 30);
-		glTexCoord2f(0,1); glVertex3f(-100, 50, -30);
-		glTexCoord2f(1,1); glVertex3f(100, 50, -30);
-		glTexCoord2f(1,0); glVertex3f(100, 50, 30);
+					glNormal3f(1, 0., 0.); //Right Side +x
+					//normal(100, 0., -30, 100, 0., 30, 100, 50, 30);
+					glVertex3f(100, 0., -30);glVertex3f(100, 0., 30);glVertex3f(100, 50, 30);glVertex3f(100, 50, -30);
 
-		normal(-60, ship_floor_height, -10, -60, ship_floor_height + 5, -15, 60, ship_floor_height + 5, -15);
-		glTexCoord2f(0, 0); glVertex3f(-60, ship_floor_height, -10);
-		glTexCoord2f(0, 1); glVertex3f(-60, ship_floor_height + 5, -15);
-		glTexCoord2f(1, 1); glVertex3f(60, ship_floor_height + 5,-15);
-		glTexCoord2f(1, 0); glVertex3f(60, ship_floor_height, -10);
-		
-		normal(-60, ship_floor_height, 10, -60, ship_floor_height + 5, 15, 60, ship_floor_height + 5, 15);
-		glTexCoord2f(0, 0); glVertex3f(-60, ship_floor_height, 10);
-		glTexCoord2f(0, 1); glVertex3f(-60, ship_floor_height + 5, 15);
-		glTexCoord2f(1, 1); glVertex3f(60, ship_floor_height + 5, 15);
-		glTexCoord2f(1, 0); glVertex3f(60, ship_floor_height, 10);
+					normal(-100, 50, -30, -50, 70, -20, -50, 70, 20); //Top left Panel
+					glVertex3f(-100, 50, -30);glVertex3f(-50, 70, -20);glVertex3f(-50, 70, 20);glVertex3f(-100, 50, 30);
 
-		glTexCoord2f(0, 0); glVertex3f(-60, 50, 10);
-		glTexCoord2f(0, 1); glVertex3f(-60, 50 - 5, 15);
-		glTexCoord2f(1, 1); glVertex3f(60, 50 - 5, 15);
-		glTexCoord2f(1, 0); glVertex3f(60, 50, 10);
+					normal(-100, 50, -30, -50, 70, -20, 50, 70, -20); //Top Middle Back Panel
+					glVertex3f(-100, 50, -30);glVertex3f(-50, 70, -20);glVertex3f(50, 70, -20);glVertex3f(100, 50, -30);
 
-		glTexCoord2f(0, 0); glVertex3f(-60, 50, -10);
-		glTexCoord2f(0, 1); glVertex3f(-60, 50 - 5, -15);
-		glTexCoord2f(1, 1); glVertex3f(60, 50 - 5, -15);
-		glTexCoord2f(1, 0); glVertex3f(60, 50, -10);
+					normal(-100, 50, 30, -50, 70, 20, 50, 70, 20); //Top Middle Front Panel
+					glVertex3f(-100, 50, 30);glVertex3f(-50, 70, 20);glVertex3f(50, 70, 20);glVertex3f(100, 50, 30);
 
-		glTexCoord2f(0, 0); glVertex3f(-60, ship_floor_height + 5, 15);
-		glTexCoord2f(0, 1); glVertex3f(-60, 45, 15);
-		glTexCoord2f(1, 1); glVertex3f(60, 45, 15);
-		glTexCoord2f(1, 0); glVertex3f(60, ship_floor_height + 5, 15);
+					normal(100, 50, -30, 50, 70, -20, 50, 70, 20); //Top Right Panel
+					glVertex3f(100, 50, -30);glVertex3f(50, 70, -20);glVertex3f(50, 70, 20);glVertex3f(100, 50, 30);
 
-		glTexCoord2f(0, 0); glVertex3f(-60, ship_floor_height + 5, -15);
-		glTexCoord2f(0, 1); glVertex3f(-60, 45, -15);
-		glTexCoord2f(1, 1); glVertex3f(60, 45, -15);
-		glTexCoord2f(1, 0); glVertex3f(60, ship_floor_height + 5, -15);
+					normal(-50, 70, -20, -50, 70, 20, 50, 70, 20); //Top Top Panel
+					glVertex3f(-50, 70, -20);glVertex3f(-50, 70, 20);glVertex3f(50, 70, 20);glVertex3f(50, 70, -20);
 
-		
+					normal(-100, 0, -30, -50, -20, -20, -50, -20, 20); //Bottom left Panel
+					glVertex3f(-100, 0, -30);glVertex3f(-50, -20, -20);glVertex3f(-50, -20, 20);glVertex3f(-100, 0, 30);
 
-	glEnd();
+					normal(-100, 0, -30, -50, -20, -20, 50, -20, -20); //Bottom Middle Back Panel
+					glVertex3f(-100, 0, -30);glVertex3f(-50, -20, -20);glVertex3f(50, -20, -20);glVertex3f(100, 0, -30);
+
+					normal(-100, 0, 30, -50, -20, 20, 50, -20, 20); //Bottom Middle Front Panel
+					glVertex3f(-100, 0, 30);glVertex3f(-50, -20, 20);glVertex3f(50, -20, 20);glVertex3f(100, 0, 30);
+
+					normal(100, 0, -30, 50, -20, -20, 50, -20, 20); //Bottom Right Panel
+					glVertex3f(100, 0, -30);glVertex3f(50, -20, -20);glVertex3f(50, -20, 20);glVertex3f(100, 0, 30);
+
+					normal(-50, -20, -20, -50, -20, 20, 50, -20, 20); //Bottom Bottom Panel
+					glVertex3f(-50, -20, -20);glVertex3f(-50, -20, 20);glVertex3f(50, -20, 20);glVertex3f(50, -20, -20);
+				glEnd();
 	
-	glBindTexture(GL_TEXTURE_2D, texId[6]);
-	glBegin(GL_QUADS);
+			glPopMatrix();
+		glPopMatrix();
 		
+		
+		
+			
+		
+		
+		glPushMatrix();		//Ship Neck
+			glColor3f(1.,1.,1.);
+			glTranslatef(-201, 25, 0);
+			glScalef(8, 2, 2.4);
+			glutSolidCube(25);
+		glPopMatrix();
 
-		normal(60, ship_floor_height, -10, 60, ship_floor_height, 10, -60, ship_floor_height, 10); //Ship Bridge
-		glTexCoord2f(1,0); glVertex3f(60, ship_floor_height, -10);
-		glTexCoord2f(1, 1); glVertex3f(60, ship_floor_height, 10);
-		glTexCoord2f(0,1); glVertex3f(-60, ship_floor_height, 10);
-		glTexCoord2f(0,0); glVertex3f(-60, ship_floor_height, -10);
-
-		glColor3f(0., 0., 1.);
-		normal(-100, ship_floor_height, 30, -100, ship_floor_height, -30, -60, ship_floor_height, -10); //Ship Floor Left Base
-		glTexCoord2f(1, 1); glVertex3f(-100, ship_floor_height, 30);
-		glTexCoord2f(0,1); glVertex3f(-100, ship_floor_height, -30);
-		glTexCoord2f(0, 0); glVertex3f(-60, ship_floor_height, -10);
-		glTexCoord2f(1, 0); glVertex3f(-60, ship_floor_height, 10);
-
-		glColor3f(0., 0., 1.);
-		normal(-100, ship_floor_height, 30, -100, ship_floor_height, -30, 60, ship_floor_height, -10); //Ship Floor Right Base
-		glTexCoord2f(1,1); glVertex3f(100, ship_floor_height, 30);
-		glTexCoord2f(0,1); glVertex3f(100, ship_floor_height, -30);
-		glTexCoord2f(0,0); glVertex3f(60, ship_floor_height, -10);
-		glTexCoord2f(1, 0); glVertex3f(60, ship_floor_height, 10);
-
-	glEnd();
+		glBegin(GL_TRIANGLES); //Ship front Cone
+			glColor3f(1.,1.,1.);
+			glVertex3f(-300, 50, 30); glVertex3f(-370, 25, 0); glVertex3f(-300, 0, 30);
+			glVertex3f(-300, 50, -30); glVertex3f(-370, 25, 0); glVertex3f(-300, 50, 30);
+			glVertex3f(-300, 50, -30); glVertex3f(-370, 25, 0); glVertex3f(-300, 0, -30);
+			glVertex3f(-300, 0, 30); glVertex3f(-370, 25, 0); glVertex3f(-300, 0, -30);
+		glEnd();
+		
+		
+	//draw lights
 	
-	
-	glPushMatrix();		//Ship Neck
-		glTranslatef(-201, 25, 0);
-		glScalef(8, 2, 2.4);
-		glutSolidCube(25);
+		glPushMatrix();
+			glColor3f(1,1,0);
+			glTranslatef(0,ship_floor_height + 25, 0);
+			glutSolidCube(2);
+		glPopMatrix();
+		glPushMatrix();
+			glColor3f(1,1,0);
+			glTranslatef(-80,ship_floor_height + 25, 0);
+			glutSolidCube(2);
+		glPopMatrix();
 	glPopMatrix();
-
-	glBegin(GL_TRIANGLES); //Ship front Cone
-		glVertex3f(-300, 50, 30); glVertex3f(-370, 25, 0); glVertex3f(-300, 0, 30);
-		glVertex3f(-300, 50, -30); glVertex3f(-370, 25, 0); glVertex3f(-300, 50, 30);
-		glVertex3f(-300, 50, -30); glVertex3f(-370, 25, 0); glVertex3f(-300, 0, -30);
-		glVertex3f(-300, 0, 30); glVertex3f(-370, 25, 0); glVertex3f(-300, 0, -30);
-	glEnd();
+	glEnable(GL_TEXTURE_2D);
 
 	
 }
@@ -198,26 +247,29 @@ void drawFeet(int lrc){
 			case(2):z1 = -2;z2 = -1;break;
 			//case(3):z1 = 1; z2 = -1;break;
 		}
-		glBegin(GL_QUADS);//Feet/Wheel things
-			glColor3f(1,1,1);
-			normal(r2_x_pos- 1, ship_floor_height , r2_z_pos -z1,r2_x_pos, ship_floor_height + 1, r2_z_pos - z1 , r2_x_pos , ship_floor_height + 1, r2_z_pos - z1);
-			glVertex3f(r2_x_pos- 1, ship_floor_height , r2_z_pos -z1);glVertex3f(r2_x_pos, ship_floor_height + 1, r2_z_pos - z1);
-			glVertex3f(r2_x_pos , ship_floor_height + 1, r2_z_pos - z1);glVertex3f(r2_x_pos + 1, ship_floor_height, r2_z_pos - z1);
+		glPushMatrix();
+		glColor3f(1,1,1);
+			glBegin(GL_QUADS);//Feet/Wheel things
+				
+				normal(r2_x_pos- 1, ship_floor_height , r2_z_pos -z1,r2_x_pos, ship_floor_height + 1, r2_z_pos - z1 , r2_x_pos , ship_floor_height + 1, r2_z_pos - z1);
+				glVertex3f(r2_x_pos- 1, ship_floor_height , r2_z_pos -z1);glVertex3f(r2_x_pos, ship_floor_height + 1, r2_z_pos - z1);
+				glVertex3f(r2_x_pos , ship_floor_height + 1, r2_z_pos - z1);glVertex3f(r2_x_pos + 1, ship_floor_height, r2_z_pos - z1);
+				
+				normal(r2_x_pos+ 1, ship_floor_height , r2_z_pos -z1,r2_x_pos + 1, ship_floor_height, r2_z_pos -z2,r2_x_pos , ship_floor_height + 1, r2_z_pos -z2 );
+				glVertex3f(r2_x_pos+ 1, ship_floor_height , r2_z_pos -z1);glVertex3f(r2_x_pos + 1, ship_floor_height, r2_z_pos -z2);
+				glVertex3f(r2_x_pos , ship_floor_height + 1, r2_z_pos -z2);glVertex3f(r2_x_pos , ship_floor_height + 1, r2_z_pos - z1 );
+				
+				normal(r2_x_pos- 1, ship_floor_height , r2_z_pos -z1,r2_x_pos - 1, ship_floor_height, r2_z_pos -z2,r2_x_pos , ship_floor_height + 1, r2_z_pos-z2 );
+				glVertex3f(r2_x_pos- 1, ship_floor_height , r2_z_pos -z1);glVertex3f(r2_x_pos - 1, ship_floor_height, r2_z_pos -z2);
+				glVertex3f(r2_x_pos , ship_floor_height + 1, r2_z_pos-z2);glVertex3f(r2_x_pos , ship_floor_height + 1, r2_z_pos - z1 );
+				
+				normal(r2_x_pos- 1, ship_floor_height , r2_z_pos -z2,r2_x_pos , ship_floor_height + 1, r2_z_pos -z2 ,r2_x_pos, ship_floor_height + 1, r2_z_pos -z2);
+				glVertex3f(r2_x_pos- 1, ship_floor_height , r2_z_pos -z2 );glVertex3f(r2_x_pos , ship_floor_height + 1, r2_z_pos -z2);
+				glVertex3f(r2_x_pos, ship_floor_height + 1, r2_z_pos -z2 );glVertex3f(r2_x_pos + 1, ship_floor_height, r2_z_pos -z2);
 			
-			normal(r2_x_pos+ 1, ship_floor_height , r2_z_pos -z1,r2_x_pos + 1, ship_floor_height, r2_z_pos -z2,r2_x_pos , ship_floor_height + 1, r2_z_pos -z2 );
-			glVertex3f(r2_x_pos+ 1, ship_floor_height , r2_z_pos -z1);glVertex3f(r2_x_pos + 1, ship_floor_height, r2_z_pos -z2);
-			glVertex3f(r2_x_pos , ship_floor_height + 1, r2_z_pos -z2);glVertex3f(r2_x_pos , ship_floor_height + 1, r2_z_pos - z1 );
-			
-			normal(r2_x_pos- 1, ship_floor_height , r2_z_pos -z1,r2_x_pos - 1, ship_floor_height, r2_z_pos -z2,r2_x_pos , ship_floor_height + 1, r2_z_pos-z2 );
-			glVertex3f(r2_x_pos- 1, ship_floor_height , r2_z_pos -z1);glVertex3f(r2_x_pos - 1, ship_floor_height, r2_z_pos -z2);
-			glVertex3f(r2_x_pos , ship_floor_height + 1, r2_z_pos-z2);glVertex3f(r2_x_pos , ship_floor_height + 1, r2_z_pos - z1 );
-			
-			normal(r2_x_pos- 1, ship_floor_height , r2_z_pos -z2,r2_x_pos , ship_floor_height + 1, r2_z_pos -z2 ,r2_x_pos, ship_floor_height + 1, r2_z_pos -z2);
-			glVertex3f(r2_x_pos- 1, ship_floor_height , r2_z_pos -z2 );glVertex3f(r2_x_pos , ship_floor_height + 1, r2_z_pos -z2);
-			glVertex3f(r2_x_pos, ship_floor_height + 1, r2_z_pos -z2 );glVertex3f(r2_x_pos + 1, ship_floor_height, r2_z_pos -z2);
-		
-			
-		glEnd();
+				
+			glEnd();
+		glPopMatrix();
 		
 }
 
@@ -227,15 +279,16 @@ void animateRobots(){
 	if(!running){
 		if(r2_x_pos > destination){
 			r2_x_pos--;
+			cp30_x_pos--;
 			} //go towards destination
 		else if(r2_x_pos == destination)
 		{
-			robots_rotation += 1;
+			robots_rotation += 5;
 			
 		}
-		if (robots_rotation == 270  && r2_x_pos == destination){ //we've turned them around
+		if (robots_rotation == 180  && r2_x_pos == destination){ //we've turned them around
 				r2_x_pos++;
-				
+				cp30_x_pos ++;
 				running = true;
 		}
 		
@@ -243,14 +296,16 @@ void animateRobots(){
 	else{
 		if (r2_x_pos < start)
 		{
+			cp30_x_pos ++;
 			r2_x_pos ++;
 		}else if(r2_x_pos == start)
 		{
-			robots_rotation -=1;
+			robots_rotation -=5;
 			
 		}
-		if (robots_rotation == 90  && r2_x_pos == start ){ //we've turned them around
+		if (robots_rotation == 0  && r2_x_pos == start ){ //we've turned them around
 			r2_x_pos--;
+			cp30_x_pos--;
 			running = false; //we are going back towards the bullets
 		}
 		
@@ -258,9 +313,13 @@ void animateRobots(){
 	if (viewNo == 2){
 		
 		eye_x = r2_x_pos;
-		theta = robots_rotation * degreeRatio;
-		
+		theta = (robots_rotation + 90) * degreeRatio;
+	}else if(viewNo ==3)
+	{
+		eye_x = cp30_x_pos;
+		theta = (robots_rotation + 90) * degreeRatio;
 	}
+		
 		
 }
 
@@ -282,173 +341,341 @@ void animateC3PO() {
 		}
 	}
 }
+void drawStormTrooper(){
+		glPushMatrix();
+		
+			int storm_height = ship_floor_height + 10;
+			//Legs
+			glTranslatef(storm_x_pos, storm_height - 2.5, storm_z_pos);
+			glRotatef(180, 0, 1,0);
+			glTranslatef(-storm_x_pos, -(storm_height - 2.5), -storm_z_pos);
+			glPushMatrix();
+				glBindTexture(GL_TEXTURE_2D, texId[14]);
+				glBegin(GL_QUADS);
+					normal(storm_x_pos - 1, storm_height + 3, storm_z_pos - 1,storm_x_pos - 1, storm_height, storm_z_pos - 1,storm_x_pos - 1, storm_height, storm_z_pos + 1);
+					glTexCoord2f(0, 0); glVertex3f(storm_x_pos - 1, storm_height + 3, storm_z_pos - 1); //front side of head
+					glTexCoord2f(0, 1); glVertex3f(storm_x_pos - 1, storm_height, storm_z_pos - 1);
+					glTexCoord2f(1, 1); glVertex3f(storm_x_pos - 1, storm_height, storm_z_pos + 1);
+					glTexCoord2f(1, 0); glVertex3f(storm_x_pos - 1, storm_height + 3, storm_z_pos + 1);
+				glEnd();
+			glPopMatrix();
+			
+			glPushMatrix();
+				glBindTexture(GL_TEXTURE_2D, texId[15]);
+				glBegin(GL_QUADS);
+					glTexCoord2f(0, 0); glVertex3f(storm_x_pos + 1, storm_height, storm_z_pos - 1); //back side of head
+					glTexCoord2f(0, 1); glVertex3f(storm_x_pos + 1, storm_height + 3, storm_z_pos - 1);
+					glTexCoord2f(1, 1); glVertex3f(storm_x_pos + 1, storm_height + 3, storm_z_pos + 1);
+					glTexCoord2f(1, 0); glVertex3f(storm_x_pos + 1, storm_height , storm_z_pos + 1);
+
+
+					glTexCoord2f(0, 0); glVertex3f(storm_x_pos + 1, storm_height, storm_z_pos - 1); //right side of head
+					glTexCoord2f(0, 1); glVertex3f(storm_x_pos + 1, storm_height + 3, storm_z_pos - 1);
+					glTexCoord2f(1, 1); glVertex3f(storm_x_pos - 1, storm_height + 3, storm_z_pos - 1);
+					glTexCoord2f(1, 0); glVertex3f(storm_x_pos - 1, storm_height, storm_z_pos - 1);
+
+					glTexCoord2f(0, 0); glVertex3f(storm_x_pos + 1, storm_height, storm_z_pos + 1); //left side of head
+					glTexCoord2f(0, 1); glVertex3f(storm_x_pos + 1, storm_height + 3, storm_z_pos + 1);
+					glTexCoord2f(1, 1); glVertex3f(storm_x_pos - 1, storm_height + 3, storm_z_pos + 1);
+					glTexCoord2f(1, 0); glVertex3f(storm_x_pos - 1, storm_height, storm_z_pos + 1);
+				glEnd();
+			glPopMatrix();
+			
+			
+		
+			
+			glPushMatrix();
+			glDisable(GL_TEXTURE_2D);
+				glColor3f(1.0,1.0,1.0);
+				glBegin(GL_QUADS);
+					
+					normal(storm_x_pos + 1 , storm_height - 5, storm_z_pos - 2,storm_x_pos + 1, storm_height, storm_z_pos - 2,storm_x_pos + 1, storm_height, storm_z_pos + 2);
+					glVertex3f(storm_x_pos + 1 , storm_height - 5, storm_z_pos - 2); //front side
+					glVertex3f(storm_x_pos + 1, storm_height, storm_z_pos - 2);
+					glVertex3f(storm_x_pos + 1, storm_height, storm_z_pos + 2);
+					glVertex3f(storm_x_pos + 1, storm_height - 5, storm_z_pos + 2);
+				glEnd();
+				
+				//glBindTexture(GL_TEXTURE_2D, texId[17]);
+				glBegin(GL_QUADS);
+					
+					normal(storm_x_pos - 1, storm_height - 5, storm_z_pos - 2,storm_x_pos - 1, storm_height, storm_z_pos - 2,storm_x_pos - 1, storm_height, storm_z_pos + 2);
+					glVertex3f(storm_x_pos - 1, storm_height - 5, storm_z_pos - 2); //back side
+					glVertex3f(storm_x_pos - 1, storm_height, storm_z_pos - 2);
+					glVertex3f(storm_x_pos - 1, storm_height, storm_z_pos + 2);
+					glVertex3f(storm_x_pos - 1, storm_height - 5, storm_z_pos + 2);
+				glEnd();
+
+				glBegin(GL_QUADS);
+					
+					normal(storm_x_pos - 1, storm_height - 5, storm_z_pos - 2,storm_x_pos + 1, storm_height - 5, storm_z_pos - 2,storm_x_pos + 1, storm_height, storm_z_pos - 2);
+					glTranslatef(cp30_x_pos, storm_height - 2.5, storm_z_pos);
+					glRotatef(robots_rotation, 0, 1,0);
+					glVertex3f(storm_x_pos - 1, storm_height - 5, storm_z_pos - 2); 
+					glVertex3f(storm_x_pos + 1, storm_height - 5, storm_z_pos - 2);
+					glVertex3f(storm_x_pos + 1, storm_height, storm_z_pos - 2);
+					glVertex3f(storm_x_pos - 1, storm_height, storm_z_pos - 2);
+					glTranslatef(storm_x_pos, storm_height - 2.5, storm_z_pos);
+					glRotatef(robots_rotation, 0, 1,0);
+					
+					normal(storm_x_pos - 1, storm_height - 5, storm_z_pos + 2,storm_x_pos + 1, storm_height - 5, storm_z_pos + 2,storm_x_pos + 1, storm_height, storm_z_pos + 2);
+					glVertex3f(storm_x_pos - 1, storm_height - 5, storm_z_pos + 2);
+					glVertex3f(storm_x_pos + 1, storm_height - 5, storm_z_pos + 2);
+					glVertex3f(storm_x_pos + 1, storm_height, storm_z_pos + 2);
+					glVertex3f(storm_x_pos - 1, storm_height, storm_z_pos + 2);
+					
+					
+					normal(storm_x_pos - 1, storm_height , storm_z_pos + 2,storm_x_pos + 1, storm_height , storm_z_pos + 2,storm_x_pos + 1, storm_height, storm_z_pos - 2);
+					glVertex3f(storm_x_pos - 1, storm_height , storm_z_pos + 2);
+					glVertex3f(storm_x_pos + 1, storm_height , storm_z_pos + 2);
+					glVertex3f(storm_x_pos + 1, storm_height, storm_z_pos - 2);
+					glVertex3f(storm_x_pos - 1, storm_height, storm_z_pos - 2);
+
+				glEnd();
+				
+				glBegin(GL_QUADS); //top of head
+					
+					glVertex3f(storm_x_pos + 1, storm_height + 3, storm_z_pos + 1);
+					glVertex3f(storm_x_pos + 1, storm_height + 3, storm_z_pos - 1);
+					glVertex3f(storm_x_pos - 1, storm_height + 3, storm_z_pos - 1);
+					glVertex3f(storm_x_pos - 1, storm_height + 3, storm_z_pos + 1);
+				glEnd();
+
+				 //Left leg
+				glPushMatrix();
+					
+					glTranslatef(storm_x_pos , ship_floor_height + 10, storm_z_pos + 1);
+					glRotatef(cp30_leg_angle, 0, 0, 1);
+					glTranslatef(-(storm_x_pos), -(ship_floor_height + 8), -(storm_z_pos + 1));
+					glTranslatef(storm_x_pos, ship_floor_height, storm_z_pos + 1);
+					glScalef(1, 13, 1);
+					glutSolidCube(1);
+				glPopMatrix();
+
+				glPushMatrix();
+					
+					glTranslatef(storm_x_pos, ship_floor_height + 10, storm_z_pos - 1);
+					glRotatef(-cp30_leg_angle, 0, 0, 1);
+					glTranslatef(-(storm_x_pos), -(ship_floor_height + 8), -(storm_z_pos - 1));
+					glTranslatef(storm_x_pos, ship_floor_height, storm_z_pos - 1);
+					glScalef(1, 13, 1);
+					glutSolidCube(1);
+				glPopMatrix();
+				 
+				glPushMatrix();			//gun hand
+					
+					glTranslatef(storm_x_pos, ship_floor_height + 10, storm_z_pos - 1);
+					glRotatef(270, 0, 0, 1);
+					glTranslatef(-(storm_x_pos), -(ship_floor_height + 8), -(storm_z_pos - 1));
+					glTranslatef(storm_x_pos, ship_floor_height + 6, storm_z_pos - 2);
+					glScalef(1, 6, 1);
+					glutSolidCube(1);
+				glPopMatrix();
+				
+				glPushMatrix();  //right hand
+					
+					
+					glTranslatef(storm_x_pos, ship_floor_height + 8, storm_z_pos + 2);
+					glScalef(1, 6, 1);
+					glutSolidCube(1);
+				glPopMatrix();
+			glPopMatrix();
+
+		
+	
+	glPopMatrix();
+	glEnable(GL_TEXTURE_2D);
+}
+
+	
 void drawCP30() {
 	glPushMatrix();
-		glColor3f(1,1,0);  //Draw Body
+		  //Draw Body
 		int cp30_height = ship_floor_height + 12;
+		glPushMatrix();
+			glBindTexture(GL_TEXTURE_2D, texId[10]);
+			glTranslatef(cp30_x_pos, cp30_height - 2.5, cp30_z_pos);
+			glRotatef(robots_rotation, 0, 1,0);
+			glTranslatef(-cp30_x_pos, -(cp30_height - 2.5), -cp30_z_pos);
+			glBegin(GL_QUADS);
+				glTexCoord2f(0, 0); glVertex3f(cp30_x_pos + 1 , cp30_height - 5, cp30_z_pos - 2); //front side
+				glTexCoord2f(0, 1); glVertex3f(cp30_x_pos + 1, cp30_height, cp30_z_pos - 2);
+				glTexCoord2f(1, 1); glVertex3f(cp30_x_pos + 1, cp30_height, cp30_z_pos + 2);
+				glTexCoord2f(1,0); glVertex3f(cp30_x_pos + 1, cp30_height - 5, cp30_z_pos + 2);
+			glEnd();
+		
+			glBindTexture(GL_TEXTURE_2D, texId[9]);
+			glBegin(GL_QUADS);
+				glTexCoord2f(0, 0); glVertex3f(cp30_x_pos - 1, cp30_height - 5, cp30_z_pos - 2); //back side
+				glTexCoord2f(0, 1); glVertex3f(cp30_x_pos - 1, cp30_height, cp30_z_pos - 2);
+				glTexCoord2f(1, 1); glVertex3f(cp30_x_pos - 1, cp30_height, cp30_z_pos + 2);
+				glTexCoord2f(1, 0); glVertex3f(cp30_x_pos - 1, cp30_height - 5, cp30_z_pos + 2);
+			glEnd();
+		
+			
+		
 	
-		glBindTexture(GL_TEXTURE_2D, texId[10]);
-		glBegin(GL_QUADS);
-			glTexCoord2f(0, 0); glVertex3f(cp30_x_pos + 1 , cp30_height - 5, cp30_z_pos - 2); //front side
-			glTexCoord2f(0, 1); glVertex3f(cp30_x_pos + 1, cp30_height, cp30_z_pos - 2);
-			glTexCoord2f(1, 1); glVertex3f(cp30_x_pos + 1, cp30_height, cp30_z_pos + 2);
-			glTexCoord2f(1,0); glVertex3f(cp30_x_pos + 1, cp30_height - 5, cp30_z_pos + 2);
-		glEnd();
-		glBindTexture(GL_TEXTURE_2D, texId[9]);
-		glBegin(GL_QUADS);
-			glTexCoord2f(0, 0); glVertex3f(cp30_x_pos - 1, cp30_height - 5, cp30_z_pos - 2); //back side
-			glTexCoord2f(0, 1); glVertex3f(cp30_x_pos - 1, cp30_height, cp30_z_pos - 2);
-			glTexCoord2f(1, 1); glVertex3f(cp30_x_pos - 1, cp30_height, cp30_z_pos + 2);
-			glTexCoord2f(1, 0); glVertex3f(cp30_x_pos - 1, cp30_height - 5, cp30_z_pos + 2);
-		glEnd();
+		
+		
+			glBindTexture(GL_TEXTURE_2D, texId[11]);
+			glBegin(GL_QUADS);
+				
+				glTexCoord2f(0, 0); glVertex3f(cp30_x_pos - 1, cp30_height + 3, cp30_z_pos - 1); //front side of head
+				glTexCoord2f(0, 1); glVertex3f(cp30_x_pos - 1, cp30_height, cp30_z_pos - 1);
+				glTexCoord2f(1, 1); glVertex3f(cp30_x_pos - 1, cp30_height, cp30_z_pos + 1);
+				glTexCoord2f(1, 0); glVertex3f(cp30_x_pos - 1, cp30_height + 3, cp30_z_pos + 1);
+			glEnd();
+		
+			glBindTexture(GL_TEXTURE_2D, texId[12]);
+			glBegin(GL_QUADS);
+				glTexCoord2f(0, 0); glVertex3f(cp30_x_pos + 1, cp30_height, cp30_z_pos - 1); //back side of head
+				glTexCoord2f(0, 1); glVertex3f(cp30_x_pos + 1, cp30_height + 3, cp30_z_pos - 1);
+				glTexCoord2f(1, 1); glVertex3f(cp30_x_pos + 1, cp30_height + 3, cp30_z_pos + 1);
+				glTexCoord2f(1, 0); glVertex3f(cp30_x_pos + 1, cp30_height , cp30_z_pos + 1);
 
-		glBegin(GL_QUADS);
-			c3poColor();
-			glNormal3f(0, 0, -1);
-			glVertex3f(cp30_x_pos - 1, cp30_height - 5, cp30_z_pos - 2); 
-			glVertex3f(cp30_x_pos + 1, cp30_height - 5, cp30_z_pos - 2);
-			glVertex3f(cp30_x_pos + 1, cp30_height, cp30_z_pos - 2);
-			glVertex3f(cp30_x_pos - 1, cp30_height, cp30_z_pos - 2);
-			
-			glNormal3f(0, 0, 1);
-			glVertex3f(cp30_x_pos - 1, cp30_height - 5, cp30_z_pos + 2);glVertex3f(cp30_x_pos + 1, cp30_height - 5, cp30_z_pos + 2);glVertex3f(cp30_x_pos + 1, cp30_height, cp30_z_pos + 2);
-			glVertex3f(cp30_x_pos - 1, cp30_height, cp30_z_pos + 2);
-			
-			
-			glNormal3f(0, 1, 0);
-			glVertex3f(cp30_x_pos - 1, cp30_height , cp30_z_pos + 2);
-			glVertex3f(cp30_x_pos + 1, cp30_height , cp30_z_pos + 2);
-			glVertex3f(cp30_x_pos + 1, cp30_height, cp30_z_pos - 2);
-			glVertex3f(cp30_x_pos - 1, cp30_height, cp30_z_pos - 2);
+				glTexCoord2f(0, 0); glVertex3f(cp30_x_pos + 1, cp30_height, cp30_z_pos + 1); //left side of head
+				glTexCoord2f(0, 1); glVertex3f(cp30_x_pos + 1, cp30_height + 3, cp30_z_pos + 1);
+				glTexCoord2f(1, 1); glVertex3f(cp30_x_pos - 1, cp30_height + 3, cp30_z_pos + 1);
+				glTexCoord2f(1, 0); glVertex3f(cp30_x_pos -1, cp30_height , cp30_z_pos  + 1);
 
-		glEnd();
-		//Legs
+				glTexCoord2f(0, 0); glVertex3f(cp30_x_pos + 1, cp30_height, cp30_z_pos - 1); //right side of head
+				glTexCoord2f(0, 1); glVertex3f(cp30_x_pos + 1, cp30_height + 3, cp30_z_pos - 1);
+				glTexCoord2f(1, 1); glVertex3f(cp30_x_pos - 1, cp30_height + 3, cp30_z_pos - 1);
+				glTexCoord2f(1, 0); glVertex3f(cp30_x_pos - 1, cp30_height, cp30_z_pos - 1);
+
+				glTexCoord2f(0, 0); glVertex3f(cp30_x_pos + 1, cp30_height, cp30_z_pos + 1); //left side of head
+				glTexCoord2f(0, 1); glVertex3f(cp30_x_pos + 1, cp30_height + 3, cp30_z_pos + 1);
+				glTexCoord2f(1, 1); glVertex3f(cp30_x_pos - 1, cp30_height + 3, cp30_z_pos + 1);
+				glTexCoord2f(1, 0); glVertex3f(cp30_x_pos - 1, cp30_height, cp30_z_pos + 1);
+			glEnd();
+			glDisable(GL_TEXTURE_2D);
+			glBegin(GL_QUADS);
+				c3poColor();
+				glNormal3f(0, 0, -1);
+				glTranslatef(cp30_x_pos, cp30_height - 2.5, cp30_z_pos);
+				glRotatef(robots_rotation, 0, 1,0);
+				glVertex3f(cp30_x_pos - 1, cp30_height - 5, cp30_z_pos - 2); 
+				glVertex3f(cp30_x_pos + 1, cp30_height - 5, cp30_z_pos - 2);
+				glVertex3f(cp30_x_pos + 1, cp30_height, cp30_z_pos - 2);
+				glVertex3f(cp30_x_pos - 1, cp30_height, cp30_z_pos - 2);
+				glTranslatef(cp30_x_pos, cp30_height - 2.5, cp30_z_pos);
+				glRotatef(robots_rotation, 0, 1,0);
+				glNormal3f(0, 0, 1);
+				glVertex3f(cp30_x_pos - 1, cp30_height - 5, cp30_z_pos + 2);glVertex3f(cp30_x_pos + 1, cp30_height - 5, cp30_z_pos + 2);glVertex3f(cp30_x_pos + 1, cp30_height, cp30_z_pos + 2);
+				glVertex3f(cp30_x_pos - 1, cp30_height, cp30_z_pos + 2);
+				
+				
+				glNormal3f(0, 1, 0);
+				glVertex3f(cp30_x_pos - 1, cp30_height , cp30_z_pos + 2);
+				glVertex3f(cp30_x_pos + 1, cp30_height , cp30_z_pos + 2);
+				glVertex3f(cp30_x_pos + 1, cp30_height, cp30_z_pos - 2);
+				glVertex3f(cp30_x_pos - 1, cp30_height, cp30_z_pos - 2);
+
+			glEnd();
 		
 
-		glBindTexture(GL_TEXTURE_2D, texId[11]);
-		glBegin(GL_QUADS);
-			
-			glTexCoord2f(0, 0); glVertex3f(cp30_x_pos - 1, cp30_height + 3, cp30_z_pos - 1); //front side of head
-			glTexCoord2f(0, 1); glVertex3f(cp30_x_pos - 1, cp30_height, cp30_z_pos - 1);
-			glTexCoord2f(1, 1); glVertex3f(cp30_x_pos - 1, cp30_height, cp30_z_pos + 1);
-			glTexCoord2f(1, 0); glVertex3f(cp30_x_pos - 1, cp30_height + 3, cp30_z_pos + 1);
-		glEnd();
-		glBindTexture(GL_TEXTURE_2D, texId[12]);
-		glBegin(GL_QUADS);
-
-		glTexCoord2f(0, 0); glVertex3f(cp30_x_pos + 1, cp30_height, cp30_z_pos - 1); //back side of head
-		glTexCoord2f(0, 1); glVertex3f(cp30_x_pos + 1, cp30_height + 3, cp30_z_pos - 1);
-		glTexCoord2f(1, 1); glVertex3f(cp30_x_pos + 1, cp30_height + 3, cp30_z_pos + 1);
-		glTexCoord2f(1, 0); glVertex3f(cp30_x_pos + 1, cp30_height , cp30_z_pos + 1);
-
-		glTexCoord2f(0, 0); glVertex3f(cp30_x_pos + 1, cp30_height, cp30_z_pos + 1); //left side of head
-		glTexCoord2f(0, 1); glVertex3f(cp30_x_pos + 1, cp30_height + 3, cp30_z_pos + 1);
-		glTexCoord2f(1, 1); glVertex3f(cp30_x_pos - 1, cp30_height + 3, cp30_z_pos + 1);
-		glTexCoord2f(1, 0); glVertex3f(cp30_x_pos -1, cp30_height , cp30_z_pos  + 1);
-
-		glTexCoord2f(0, 0); glVertex3f(cp30_x_pos + 1, cp30_height, cp30_z_pos - 1); //right side of head
-		glTexCoord2f(0, 1); glVertex3f(cp30_x_pos + 1, cp30_height + 3, cp30_z_pos - 1);
-		glTexCoord2f(1, 1); glVertex3f(cp30_x_pos - 1, cp30_height + 3, cp30_z_pos - 1);
-		glTexCoord2f(1, 0); glVertex3f(cp30_x_pos - 1, cp30_height, cp30_z_pos - 1);
-
-		glTexCoord2f(0, 0); glVertex3f(cp30_x_pos + 1, cp30_height, cp30_z_pos + 1); //left side of head
-		glTexCoord2f(0, 1); glVertex3f(cp30_x_pos + 1, cp30_height + 3, cp30_z_pos + 1);
-		glTexCoord2f(1, 1); glVertex3f(cp30_x_pos - 1, cp30_height + 3, cp30_z_pos + 1);
-		glTexCoord2f(1, 0); glVertex3f(cp30_x_pos - 1, cp30_height, cp30_z_pos + 1);
-
-		glEnd();
-
-		glBegin(GL_QUADS); //top of head
-		glVertex3f(cp30_x_pos + 1, cp30_height + 3, cp30_z_pos + 1);
-		glVertex3f(cp30_x_pos + 1, cp30_height + 3, cp30_z_pos - 1);
-		glVertex3f(cp30_x_pos - 1, cp30_height + 3, cp30_z_pos - 1);
-		glVertex3f(cp30_x_pos - 1, cp30_height + 3, cp30_z_pos + 1);
-		glEnd();
+			glBegin(GL_QUADS); //top of head
+			glVertex3f(cp30_x_pos + 1, cp30_height + 3, cp30_z_pos + 1);
+			glVertex3f(cp30_x_pos + 1, cp30_height + 3, cp30_z_pos - 1);
+			glVertex3f(cp30_x_pos - 1, cp30_height + 3, cp30_z_pos - 1);
+			glVertex3f(cp30_x_pos - 1, cp30_height + 3, cp30_z_pos + 1);
+			glEnd();
 
 		 //Left leg
-		glPushMatrix();
-			glTranslatef(cp30_x_pos , ship_floor_height + 10, cp30_z_pos + 1);
-			glRotatef(cp30_leg_angle, 0, 0, 1);
-			glTranslatef(-(cp30_x_pos), -(ship_floor_height + 10), -(cp30_z_pos + 1));
-			glTranslatef(cp30_x_pos, ship_floor_height, cp30_z_pos + 1);
-			glScalef(1, 15, 1);
-			glutSolidCube(1);
-		glPopMatrix();
+			glPushMatrix();
+				glTranslatef(cp30_x_pos , ship_floor_height + 10, cp30_z_pos + 1);
+				glRotatef(cp30_leg_angle, 0, 0, 1);
+				glTranslatef(-(cp30_x_pos), -(ship_floor_height + 10), -(cp30_z_pos + 1));
+				glTranslatef(cp30_x_pos, ship_floor_height, cp30_z_pos + 1);
+				glScalef(1, 15, 1);
+				glutSolidCube(1);
+			glPopMatrix();
 
-		glPushMatrix();
-			glTranslatef(cp30_x_pos, ship_floor_height + 10, cp30_z_pos - 1);
-			glRotatef(-cp30_leg_angle, 0, 0, 1);
-			glTranslatef(-(cp30_x_pos), -(ship_floor_height + 10), -(cp30_z_pos - 1));
-			glTranslatef(cp30_x_pos, ship_floor_height, cp30_z_pos - 1);
-			glScalef(1, 15, 1);
-			glutSolidCube(1);
+			glPushMatrix();
+				glTranslatef(cp30_x_pos, ship_floor_height + 10, cp30_z_pos - 1);
+				glRotatef(-cp30_leg_angle, 0, 0, 1);
+				glTranslatef(-(cp30_x_pos), -(ship_floor_height + 10), -(cp30_z_pos - 1));
+				glTranslatef(cp30_x_pos, ship_floor_height, cp30_z_pos - 1);
+				glScalef(1, 15, 1);
+				glutSolidCube(1);
+			glPopMatrix();
+			
+			glPushMatrix();  //right hand
+				glTranslatef(cp30_x_pos, cp30_height - 3, cp30_z_pos + 2.5);
+				glScalef(1, 6, 1);
+				glutSolidCube(1);
+			glPopMatrix();
+			
+			glPushMatrix();  //right hand
+				glTranslatef(cp30_x_pos, cp30_height - 3, cp30_z_pos - 2.5);
+				glScalef(1, 6, 1);
+				glutSolidCube(1);
+			glPopMatrix();
 		glPopMatrix();
 
 		
-		/*glPushMatrix();
-		
-		glScalef(1, 15, 1);
-		glutSolidCube(1);
-		glPopMatrix();
-		glPushMatrix();
-		glTranslatef(cp30_x_pos, ship_floor_height, cp30_z_pos - 1);
-		glScalef(1, 15, 1);
-		glutSolidCube(1);
-		glPopMatrix();*/
 
 	glPopMatrix();
+	
 }
 //--Draws a character model constructed using GLUT objects ------------------
 void drawR2()
 {
+	int r2_height = 6;
 	glPushMatrix();
-		glBegin(GL_QUAD_STRIP);
-		float rads;
-		glColor3f(1, 1, 1); //Cylinder Body
-		int r2_height = 6;
-		glVertex3f(r2_x_pos + cos(0), ship_floor_height + r2_height, r2_z_pos + sin(0));
-		glVertex3f(r2_x_pos + cos(0), ship_floor_height , r2_z_pos +sin(0));
-		for (int i = 0; i <= 359 ; i++ )
-		{	
-			rads = i * degreeRatio;
-			normal(r2_x_pos + cos(rads), ship_floor_height, r2_z_pos + sin(rads),r2_x_pos + cos(rads), ship_floor_height + r2_height, r2_z_pos +sin(rads),
-					r2_x_pos + cos(rads + 1* degreeRatio), ship_floor_height + r2_height, r2_z_pos +sin(rads + 1 * degreeRatio));
-			glVertex3f(r2_x_pos + cos(rads + 1* degreeRatio), ship_floor_height + r2_height, r2_z_pos +sin(rads + 1 * degreeRatio));
-			glVertex3f(r2_x_pos + cos(rads + 1* degreeRatio), ship_floor_height, r2_z_pos + sin(rads + 1* degreeRatio));
-		}
-		glVertex3f(r2_x_pos + cos(0), ship_floor_height , r2_z_pos +sin(1* degreeRatio));
-		glVertex3f(r2_x_pos + cos(0), ship_floor_height + r2_height, r2_z_pos + sin(1* degreeRatio));
-		glEnd();
-	glPopMatrix();
+		glTranslatef(r2_x_pos, ship_floor_height + r2_height, r2_z_pos);
+		glRotatef(robots_rotation, 0, 1,0);
+		glTranslatef(-r2_x_pos, -(ship_floor_height + r2_height), -r2_z_pos);
+		glPushMatrix();
+			
+			glBegin(GL_QUAD_STRIP);
+				float rads;
+				glColor3f(1, 1, 1); //Cylinder Body
+				
+				glVertex3f(r2_x_pos + cos(0), ship_floor_height + r2_height, r2_z_pos + sin(0));
+				glVertex3f(r2_x_pos + cos(0), ship_floor_height , r2_z_pos +sin(0));
+				for (int i = 0; i <= 359 ; i++ )
+				{	
+					rads = i * degreeRatio;
+					normal(r2_x_pos + cos(rads), ship_floor_height, r2_z_pos + sin(rads),r2_x_pos + cos(rads), ship_floor_height + r2_height, r2_z_pos +sin(rads),
+							r2_x_pos + cos(rads + 1* degreeRatio), ship_floor_height + r2_height, r2_z_pos +sin(rads + 1 * degreeRatio));
+					glVertex3f(r2_x_pos + cos(rads + 1* degreeRatio), ship_floor_height + r2_height, r2_z_pos +sin(rads + 1 * degreeRatio));
+					glVertex3f(r2_x_pos + cos(rads + 1* degreeRatio), ship_floor_height, r2_z_pos + sin(rads + 1* degreeRatio));
+				}
+				glVertex3f(r2_x_pos + cos(0), ship_floor_height , r2_z_pos +sin(1* degreeRatio));
+				glVertex3f(r2_x_pos + cos(0), ship_floor_height + r2_height, r2_z_pos + sin(1* degreeRatio));
+			glEnd();
+		glPopMatrix();
 
 
-	glPushMatrix();    //Draw R2 Head
-		glColor3f(0., 0., 1.);
-		glTranslatef(r2_x_pos, ship_floor_height + r2_height, r2_z_pos );
-		glRotatef(robots_rotation, 0., 0., 1.);
-		glutSolidSphere(1, 50,25);
+		glPushMatrix();    //Draw R2 Head
+			glColor3f(0., 0., 1.);
+			glTranslatef(r2_x_pos, ship_floor_height + r2_height, r2_z_pos );
+			glRotatef(robots_rotation, 0., 0., 1.);
+			glutSolidSphere(1, 50,25);
+		glPopMatrix();
 		
-	glPopMatrix();
-	
-	
-	
-	// Draw leg 1
-	
-	glPushMatrix();
-		glColor3f(0,0,1);
-		glTranslatef(r2_x_pos, ship_floor_height + 2, r2_z_pos + 1);
-		glScalef(1, r2_height, 1);
-		glutSolidCube(1);
-	glPopMatrix();
-	
-	drawFeet(1);
-	drawFeet(2);
 		
-	glPushMatrix();
-		glColor3f(0,0,1);
-		glTranslatef(r2_x_pos, ship_floor_height + 2, r2_z_pos - 1);
-		glScalef(1, r2_height, 1);
-		glutSolidCube(1);
+		
+		// Draw leg 1
+		
+		glPushMatrix();
+			glColor3f(0,0,1);
+			glTranslatef(r2_x_pos, ship_floor_height + 2, r2_z_pos + 1);
+			glScalef(1, r2_height, 1);
+			glutSolidCube(1);
+		glPopMatrix();
+		
+		drawFeet(1);
+		
+			//Draw Leg 2
+		glPushMatrix();
+			glColor3f(0,0,1);
+			glTranslatef(r2_x_pos, ship_floor_height + 2, r2_z_pos - 1);
+			glScalef(1, r2_height, 1);
+			glutSolidCube(1);
+		glPopMatrix();
+		drawFeet(2);
 	glPopMatrix();
 
 		
@@ -522,7 +749,47 @@ void draw_skybox(float x, float y, float z, float width, float height, float len
 	glEnd();
 	
 }
-
+void fireBullet(){
+	
+	glPushMatrix();
+		glColor3f(1,0,0);
+		glTranslatef(storm_x_pos + 6, ship_floor_height + 6, storm_z_pos);
+		glScalef(3,1,1);
+		glutSolidCube(1);
+	glPopMatrix();
+		
+}
+void animateClone(){
+	
+	
+	if (!running){
+		if(r2_x_pos <= -27.5 && r2_x_pos > destination){
+		storm_x_pos++;
+		}
+	
+	}else if(running == true){
+		
+		if (storm_x_pos > -70 && r2_x_pos > 37.5){
+			storm_x_pos--;
+		}
+		if(robots_rotation == 180  && r2_x_pos > destination){ //turned round
+			//fireBullet();
+			
+		}
+			
+		if(running && r2_x_pos < start){
+			bullet_x_pos += 5;
+		}
+		if(r2_x_pos == start){
+		
+			bullet_x_pos = storm_x_pos + 6;
+		//set bullet position to hand position
+		};
+	}
+}
+	
+	
+		
 
 
 //--Display: ---------------------------------------------------------------
@@ -530,14 +797,15 @@ void draw_skybox(float x, float y, float z, float width, float height, float len
 //--the scene.
 void display()
 {
-	float lpos[4] = { 0, 0, 0, 1.0 };  //light's position
+		
+	float lgt_pos[4]={0,ship_floor_height + 25, 0, 1.};
 	
+	float lgt_pos2[4]={-80,ship_floor_height + 50, 0, 1.};
 	float dir_x = -sin(theta), dir_y = 0,  dir_z = -cos(theta);
 
 
 	eye_x = eye_x + 1.1* dir_x * step;
 	eye_z = eye_z + 1.1* dir_z * step;
-	
 	
 	look_x = eye_x + 2*dir_x;
 	look_y = eye_y + 2*dir_y;
@@ -549,12 +817,9 @@ void display()
 	glLoadIdentity();
 	
 	gluLookAt(eye_x, eye_y, eye_z,  look_x, look_y, look_z,   0, 1, 0);	
-	glLightfv(GL_LIGHT0, GL_POSITION, lpos);   //Set light position
-
-	//glRotatef(angle, 0.0, 1.0, 0.0);  //Rotate the scene about the y-axis
-
-			//Disable lighting when drawing floor.
-	//drawFloor();
+	
+	glLightfv(GL_LIGHT0, GL_POSITION, lgt_pos);
+	glLightfv(GL_LIGHT0, GL_POSITION, lgt_pos2);
 	
 	
 	glEnable(GL_TEXTURE_2D);
@@ -563,8 +828,9 @@ void display()
 	draw_skybox(eye_x, eye_y, eye_z, 5000, 5000, 5000);
 
 	glDisable(GL_TEXTURE_2D);
-	glEnable(GL_LIGHTING);
+	
 	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_LIGHTING);
 	drawHangar();//Enable lighting when drawing the model
 	glDisable(GL_TEXTURE_2D);
 
@@ -572,7 +838,9 @@ void display()
 	
 	drawR2();
 	glEnable(GL_TEXTURE_2D);
+	drawStormTrooper();
 	drawCP30();
+	
 	glDisable(GL_TEXTURE_2D);
 	glFlush();
 }
@@ -607,7 +875,7 @@ void changeView()
 	}
 	else{
 		viewNo = 1;  //default view. Just above 
-		eye_x = 0; eye_y = ship_floor_height + 10; eye_z = 15;
+		eye_x = 0; eye_y = ship_floor_height + 10; eye_z = 10;
 		look_x = 0; look_y = 0; look_z = 0;
 		locked_view = false;
 		theta = 0;
@@ -623,9 +891,24 @@ void initialize()
 	
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);	//Background colour
 
+	float lgt_amb[4] = {0.2, 0.2, 0.2, 1.0};
+	float lgt_dif[4] = {1.0, 1.0, 1.0, 1.0};
+	float lgt_spe[4] = {1.0, 1.0, 1.0, 1.0};
+	float mat_amb[4] = {0.0, 0.0, 1.0, 1.0};
+	float mat_dif[4] = {0.0, 0.0, 1.0, 1.0};
+	float mat_spe[4] = {1.0, 1.0, 1.0, 1.0};
+
+	 glLightfv(GL_LIGHT0, GL_AMBIENT, lgt_amb);
+	 glLightfv(GL_LIGHT0, GL_DIFFUSE, lgt_dif);
+	 glLightfv(GL_LIGHT0, GL_SPECULAR, lgt_spe);
+	 glMaterialfv(GL_FRONT, GL_AMBIENT, mat_amb);
+	 glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_dif);
+	 glMaterialfv(GL_FRONT, GL_SPECULAR, mat_spe);
+	 glMaterialf(GL_FRONT, GL_SHININESS, 50); 
+	
 	glEnable(GL_LIGHTING);					//Enable OpenGL states
 	glEnable(GL_LIGHT0);
-	glEnable(GL_COLOR_MATERIAL);
+ 	glEnable(GL_COLOR_MATERIAL);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_NORMALIZE);
 
@@ -654,8 +937,9 @@ void special(int key, int x, int y)
 
 void myTimer(int value)
 {
-	
+	animateClone();
 	animateRobots();
+	
 	animateC3PO();
 	glutPostRedisplay();
 	glutTimerFunc(50, myTimer, 0);
